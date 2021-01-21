@@ -2,7 +2,7 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-(def initial-state {:ship {:heading 0 :pos [400 300] :p [1 -5] :forces [[0 0.1]]}})
+(def initial-state {:ship {:heading q/PI :pos [400 300] :p [0 0] :forces {:gravity [0 0]}}})
 
 (defn ship-mass [ship] 1)
 
@@ -25,28 +25,39 @@
     (do
       (println (state :ship))
       (case (q/key-as-keyword)
-        :left (update-in state [:ship :heading] #(- %1 0.1))
-        :right (update-in state [:ship :heading]  #(+ %1 0.1))
-        :else state))
-    state))
+        :space (thrust-on state)
+        :left (update-in state [:ship :heading] #(mod (- %1 0.1) (* 2 q/PI)))            
+        :right (update-in state [:ship :heading] #(mod (+ %1 0.1) (* 2 q/PI)))
+        (thrust-off state)))
+    (thrust-off state))) 
 
+(defn thrust-off [state]
+  (assoc-in state [:ship :forces :thrust] [0 0]))
+
+(defn thrust-on [state]
+  (let [heading (get-in state [:ship :heading])
+        x-component (* -1 (Math/sin heading))
+        y-component (Math/cos heading)
+        strength 0.1]
+    (assoc-in state [:ship :forces :thrust] [(* strength x-component) (* strength y-component)])))
+       
 (defn update-position [state]
   (let [[x y] (get-in state [:ship :pos])
-        [px py] (get-in state [:ship :p])]
-    (assoc-in state [:ship :pos] [(+ x px) (+ y py)])))
+        [vx vy] (get-in state [:ship :p])]
+    (assoc-in state [:ship :pos] [(+ x vx) (+ y vy)])))
 
-(defn update-momentum [state]
-  (let [[px py] (get-in state [:ship :p])
+(defn update-velocity [state]
+  (let [[vx vy] (get-in state [:ship :p])
         forces (get-in state [:ship :forces])
         mass (ship-mass (state :ship))]
     (assoc-in state [:ship :p] 
-              (reduce (fn [[px py] [fx fy]] [(+ px (/ fx mass)) (+ py (/ fy mass))]) 
-                      [px py] 
-                      forces))))
+              (reduce (fn [[vx vy] [fx fy]] [(+ vx (/ fx mass)) (+ vy (/ fy mass))]) 
+                      [vx vy] 
+                      (vals forces)))))
 
 (defn update-state [state]
   (-> state
-      update-momentum
+      update-velocity
       update-with-key-input
       update-position))
 
