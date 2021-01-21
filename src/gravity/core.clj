@@ -2,7 +2,9 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-(def initial-state {:ship {:heading q/PI :pos [400 300] :p [0 0] :forces {:gravity [0 0]}}})
+(def gravity-strength 0.03)
+(def thrust-strength 0.1)
+(def initial-state {:ship {:heading q/PI :pos [400 300] :v [0 0] :forces {:gravity [0 gravity-strength]}}})
 
 (defn ship-mass [ship] 1)
 
@@ -13,8 +15,7 @@
   initial-state)
 
 (defn draw-ship [ship]
-  (let [x (first (ship :pos))
-        y (second (ship :pos))]
+  (let [[x y] (ship :pos)]
     (q/with-translation [x y]
       (q/with-rotation [(ship :heading)]
         (q/fill 255 255 255)
@@ -38,19 +39,19 @@
   (let [heading (get-in state [:ship :heading])
         x-component (* -1 (Math/sin heading))
         y-component (Math/cos heading)
-        strength 0.1]
+        strength thrust-strength]
     (assoc-in state [:ship :forces :thrust] [(* strength x-component) (* strength y-component)])))
        
 (defn update-position [state]
   (let [[x y] (get-in state [:ship :pos])
-        [vx vy] (get-in state [:ship :p])]
+        [vx vy] (get-in state [:ship :v])]
     (assoc-in state [:ship :pos] [(+ x vx) (+ y vy)])))
 
 (defn update-velocity [state]
-  (let [[vx vy] (get-in state [:ship :p])
+  (let [[vx vy] (get-in state [:ship :v])
         forces (get-in state [:ship :forces])
         mass (ship-mass (state :ship))]
-    (assoc-in state [:ship :p] 
+    (assoc-in state [:ship :v] 
               (reduce (fn [[vx vy] [fx fy]] [(+ vx (/ fx mass)) (+ vy (/ fy mass))]) 
                       [vx vy] 
                       (vals forces)))))
