@@ -2,9 +2,12 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-(def gravity-strength 0.03)
+(def gravity-strength 0.02)
 (def thrust-strength 0.1)
-(def initial-state {:ship {:heading q/PI :pos [400 300] :v [0 0] :forces {:gravity [0 gravity-strength]}}})
+(def initial-state {:ship 
+                    {:heading q/PI :pos [400 300] :v [0 0] :forces {:gravity [0 gravity-strength]}}
+                    :platforms [[350 500 450 500]]
+                    })    
 
 (defn ship-mass [ship] 1)
 
@@ -14,25 +17,46 @@
   ; setup function returns initial state.
   initial-state)
 
+(def ship-points [-9 -6 9 -6 0 18])
+
+(defn rotate [[x y] angle]
+  (let [x' (- (* x (Math/cos angle)) (* y (Math/sin angle)))
+        y' (- (* y (Math/cos angle)) (* -1 x (Math/sin angle)))]
+    [x' y'] 
+))
+
+(defn translate [[x y] [dx dy]]
+  [(+ x dx) (+ y dy)])
+
+;|1  0||c -s|    |c  -s|
+;|0 -1||s  c|  = |-s -c|
+;
+;|c  -s||x|   | xc - ys|
+;|-s -c||y| = |-xs - cy|
+
+
 (defn draw-ship [ship]
-  (let [[x y] (ship :pos)]
-    (q/with-translation [x y]
-      (q/with-rotation [(ship :heading)]
-        (q/fill 255 255 255)
-        (q/triangle -9 -6 9 -6 0 18)))))
+  (let [rotated (map #(rotate %1 (ship :heading)) (partition 2 ship-points))
+        translated (map #(translate %1 (ship :pos)) rotated)]
+    (q/fill 255 255 255)
+    (apply q/triangle (flatten translated))))
+
+(defn draw-platforms [platforms]
+  (doseq [line platforms]
+    (q/stroke 255 255 255)           
+    (apply q/line line)))
        
- (defn update-with-key-input [state] 
+(defn update-with-key-input [state] 
   (if (q/key-pressed?)
-    (do
-      (println (state :ship))
-      (case (q/key-as-keyword)
-        :space (thrust-on state)
-        :left (update-in state [:ship :heading] #(mod (- %1 0.1) (* 2 q/PI)))            
-        :right (update-in state [:ship :heading] #(mod (+ %1 0.1) (* 2 q/PI)))
-        (thrust-off state)))
+    (case (q/key-as-keyword)
+      :space (thrust-on state)
+      :left (update-in state [:ship :heading] #(mod (- %1 0.1) (* 2 q/PI)))            
+      :right (update-in state [:ship :heading] #(mod (+ %1 0.1) (* 2 q/PI)))
+      :r initial-state
+      (thrust-off state))
     (thrust-off state))) 
 
-(defn thrust-off [state]
+(defn thrust-off [state]  
   (assoc-in state [:ship :forces :thrust] [0 0]))
 
 (defn thrust-on [state]
@@ -64,7 +88,8 @@
 
 (defn draw-state [state]
   (q/background 0 0 23)
-  (draw-ship (state :ship)))
+  (draw-ship (state :ship))
+  (draw-platforms (state :platforms)))
 
 (q/defsketch gravity
   :title "Gravity"
@@ -73,4 +98,5 @@
   :update update-state
   :draw draw-state
   :features [:keep-on-top]
-  :middleware [m/fun-mode])                  
+  :middleware [m/fun-mode])                                    
+
