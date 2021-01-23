@@ -2,11 +2,11 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-(def gravity-strength 0.02)
+(def gravity-strength -0.01)
 (def thrust-strength 0.1)
 (def initial-state {:ship 
-                    {:heading q/PI :pos [400 300] :v [0 0] :forces {:gravity [0 gravity-strength]}}
-                    :platforms [[350 500 450 500]]
+                    {:heading 0 :pos [400 300] :v [0 0] :forces {:gravity [0 gravity-strength]}}
+                    :platforms [[350 50 450 50]]
                     })    
 
 (defn ship-mass [ship] 1)
@@ -19,20 +19,23 @@
 
 (def ship-points [-9 -6 9 -6 0 18])
 
-(defn rotate [[x y] angle]
-  (let [x' (- (* x (Math/cos angle)) (* y (Math/sin angle)))
-        y' (- (* y (Math/cos angle)) (* -1 x (Math/sin angle)))]
-    [x' y'] 
-))
 
-(defn translate [[x y] [dx dy]]
-  [(+ x dx) (+ y dy)])
-
+;want matrix for cw rotation 
+;when +ve y is down
 ;|1  0||c -s|    |c  -s|
 ;|0 -1||s  c|  = |-s -c|
 ;
 ;|c  -s||x|   | xc - ys|
 ;|-s -c||y| = |-xs - cy|
+
+(defn rotate [[x y] angle]
+  (let [x' (- (* x (Math/cos angle)) (* y (Math/sin angle)))
+        y' (+ (* y (Math/cos angle)) (* x (Math/sin angle)))]
+    [x' y'] 
+))
+
+(defn translate [[x y] [dx dy]]
+  [(+ x dx) (+ y dy)])
 
 
 (defn draw-ship [ship]
@@ -50,8 +53,8 @@
   (if (q/key-pressed?)
     (case (q/key-as-keyword)
       :space (thrust-on state)
-      :left (update-in state [:ship :heading] #(mod (- %1 0.1) (* 2 q/PI)))            
-      :right (update-in state [:ship :heading] #(mod (+ %1 0.1) (* 2 q/PI)))
+      :left (update-in state [:ship :heading] #(mod (+ %1 0.1) (* 2 q/PI)))            
+      :right (update-in state [:ship :heading] #(mod (- %1 0.1) (* 2 q/PI)))
       :r initial-state
       (thrust-off state))
     (thrust-off state))) 
@@ -87,6 +90,8 @@
       update-position))
 
 (defn draw-state [state]
+  (q/scale 1 -1)
+  (q/translate 0 -600)
   (q/background 0 0 23)
   (draw-ship (state :ship))
   (draw-platforms (state :platforms)))
