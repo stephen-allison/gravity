@@ -1,6 +1,7 @@
 (ns gravity.core
   (:require [quil.core :as q]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [gravity.geometry :as g]))
 
 (def gravity-strength -0.01)
 (def thrust-strength 0.1)
@@ -9,6 +10,8 @@
                     :platforms [[350 50 450 50]]
                     })    
 
+(def ship-points [-9 -6 9 -6 0 18])
+
 (defn ship-mass [ship] 1)
 
 (defn setup []
@@ -16,31 +19,10 @@
   (q/color-mode :rgb)
   ; setup function returns initial state.
   initial-state)
-
-(def ship-points [-9 -6 9 -6 0 18])
-
-
-;want matrix for cw rotation 
-;when +ve y is down
-;|1  0||c -s|    |c  -s|
-;|0 -1||s  c|  = |-s -c|
-;
-;|c  -s||x|   | xc - ys|
-;|-s -c||y| = |-xs - cy|
-
-(defn rotate [[x y] angle]
-  (let [x' (- (* x (Math/cos angle)) (* y (Math/sin angle)))
-        y' (+ (* y (Math/cos angle)) (* x (Math/sin angle)))]
-    [x' y'] 
-))
-
-(defn translate [[x y] [dx dy]]
-  [(+ x dx) (+ y dy)])
-
-
+ 
 (defn draw-ship [ship]
-  (let [rotated (map #(rotate %1 (ship :heading)) (partition 2 ship-points))
-        translated (map #(translate %1 (ship :pos)) rotated)]
+  (let [rotated (map #(g/rotate %1 (ship :heading)) (partition 2 ship-points))
+        translated (map #(g/translate %1 (ship :pos)) rotated)]
     (q/fill 255 255 255)
     (apply q/triangle (flatten translated))))
 
