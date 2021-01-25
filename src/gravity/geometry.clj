@@ -1,6 +1,5 @@
 (ns gravity.geometry)
 
-
 (defn rotate 
   "Rotates a point [x y] by given angle (in radians) clockwise about origin"
   [[x y] angle]
@@ -20,9 +19,6 @@
         [u' v'] [(- u2 u1) (- v2 v1)]]
     (- (* u' y') (* x' v'))))
 
-(cross-product [[0 0] [1 1]] [[0 0] [3 4]])
-(* (Math/sqrt 2) 5  (Math/sin (-  (Math/atan (/ 4 3)) (/ Math/PI 4)))) 
-
 (defn direction
   "Whether bend in line between three points is to left or right or line is straight.
    Returns number < 0 if turn is to left
@@ -35,7 +31,7 @@
 
 
 
-(defn on-segment 
+(defn on-segment?
   "Whether point [x3 y3] lies on segment between points [x1 y1] and [x2 y2]"
   [[x1 y1] [x2 y2] [x3 y3]]
   (let [x-check (<= (min x1 x2) x3 (max x1 x2))
@@ -54,8 +50,8 @@
         direction-check (and  (< (* d1 d2) 0) (< (* d3 d4) 0))]
     (if direction-check
       true
-      (cond (and (= 0 d1) (on-segment p3 p4 p1)) true 
-            (and (= 0 d2) (on-segment p3 p4 p2)) true
-            (and (= 0 d3) (on-segment p1 p2 p3)) true
-            (and (= 0 d4) (on-segment p1 p2 p4)) true
+      (cond (and (= 0 d1) (on-segment? p3 p4 p1)) true 
+            (and (= 0 d2) (on-segment? p3 p4 p2)) true
+            (and (= 0 d3) (on-segment? p1 p2 p3)) true
+            (and (= 0 d4) (on-segment? p1 p2 p4)) true
             :else false))))
