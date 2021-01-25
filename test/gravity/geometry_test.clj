@@ -69,11 +69,9 @@
     (is (false? (g/segments-intersect? [[-1 1] [9 3]] [[-1 8] [1 3]])))))
 
 (defspec test-overlapping-cords-intersect 1000
-  (prop/for-all [angles (gen/vector-distinct (gen/double* 
-                                              {:min 1E-5 
-                                               :max (* 2 Math/PI) 
-                                               :NaN? false })
-                                              {:num-elements 4})]
+  (prop/for-all [angles (gen/vector-distinct 
+                          (gen/double* {:min 1E-5 :max (* 2 Math/PI) :NaN? false })
+                         {:num-elements 4})]
                 (let [[a b c d] (sort angles)
                       p1 (g/rotate [10 0] a)
                       p2 (g/rotate [10 0] b)
@@ -82,11 +80,9 @@
                   (is (true? (g/segments-intersect? [p1 p3] [p2 p4])) (str [a b c d] [p1 p3] [p2 p4])))))
 
 (defspec test-non-overlapping-cords--do-not-intersect 1000
-  (prop/for-all [angles (gen/vector-distinct (gen/double* 
-                                              {:min 1E-5 
-                                               :max (* 2 Math/PI) 
-                                               :NaN? false })
-                                              {:num-elements 4})]
+  (prop/for-all [angles (gen/vector-distinct 
+                          (gen/double* {:min 1E-5 :max (* 2 Math/PI) :NaN? false })
+                         {:num-elements 4})]
                 (let [[a b c d] (sort angles)
                       p1 (g/rotate [10 0] a)
                       p2 (g/rotate [10 0] b)
