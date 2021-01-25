@@ -46,9 +46,6 @@
                       expected (* len-1 len-2 (Math/sin angle))]
                   (close-enough expected cp))))
 
-(g/cross-product [[0 0] (g/rotate [1 0] 0.5) ] [[0 0] (g/rotate [1 0] 1.0)])
-(g/rotate [2 0] 0.5)
-
 (deftest test-direction
   (testing "Left turn gives negative result"
     (is (> 0 (g/direction [0 0] [1 1] [0 2]))))
@@ -68,7 +65,7 @@
     (is (true? (g/segments-intersect? [[0 0] [1 1]] [[0 2] [1 1]]))))
   (testing "Non-orthodonal intersecting lines"
     (is (true? (g/segments-intersect? [[-1 1] [9 3]] [[-1 8] [9 -3]]))))
-  (testing "Non-orthodonal non-intersect?ing lines"
+  (testing "Non-orthodonal non-intersecting lines"
     (is (false? (g/segments-intersect? [[-1 1] [9 3]] [[-1 8] [1 3]])))))
 
 (defspec test-overlapping-cords-intersect 1000
