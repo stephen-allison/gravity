@@ -59,24 +59,3 @@
             (and (= 0 d3) (on-segment p1 p2 p3)) true
             (and (= 0 d4) (on-segment p1 p2 p4)) true
             :else false))))
-
-(segments-intersect? [[0 -1] [0 1]] [[-1 0] [1 0]])
-(segments-intersect? [[0 0] [1 0]] [[0 0] [0 1]])
-(segments-intersect? [[1 1] [1 2]] [[1 1] [2 1]])
-(segments-intersect? [[1 1] [2 1]] [[1 1] [1 2]])
-(segments-intersect? [[0 0] [0 1]] [[1 1] [2 1]])
-(segments-intersect? [[1 2] [3 7]] [[9 12] [6 19]])
-(segments-intersect? [[0 0] [0 1]] [[0 0] [4 3]])
-
-(direction [-1 0] [1 0] [0 -1]) ; 3,4,1
-(direction [-1 0] [1 0] [0 1])  ; 3,4,2
-(direction [0 -1] [0 1] [-1 0]) ; 1,2,3
-(direction [0 -1] [0 1] [1 0])  ; 1,2,4 
-
-(direction [-1 0] [1 0] [-1 -1]) ; 3,4,1
-(direction [-1 0] [1 0] [1 -1])  ; 3,4,2
-(direction [0 -1] [0 1] [-1 0]) ; 1,2,3
-(direction [0 -1] [0 1] [1 0])  ; 1,2,4
-
-(* (Math/sin (/ Math/PI 4)) (Math/sqrt 2))
-(* 5 0.8)
