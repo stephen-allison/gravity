@@ -29,15 +29,12 @@
   (cross-product [[0 0] [(- x2 x0) (- y2 y0)]] 
                  [[0 0] [(- x1 x0) (- y1 y0)]]))
 
-
-
 (defn on-segment?
   "Whether point [x3 y3] lies on segment between points [x1 y1] and [x2 y2]"
   [[x1 y1] [x2 y2] [x3 y3]]
   (let [x-check (<= (min x1 x2) x3 (max x1 x2))
         y-check (<= (min y1 y2) y3 (max y1 y2))]
-    (and x-check y-check)
-))
+    (and x-check y-check)))
 
 (defn segments-intersect?
   "Determine if two line segments p1->p2 and p3->p4 intersect

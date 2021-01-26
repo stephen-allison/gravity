@@ -93,17 +93,17 @@
     (when (some true? colls)
       (println (str "Collision " (vector colls)))
       state)
-    state
+    state               
 ))
 
 (defn update-state [state]
   (-> state
       update-velocity
-      update-with-key-input       
+      update-collision-feelers       
       update-position
-      update-collision-feelers          
+      update-with-key-input          
       check-collisions
-))
+))             
 
 (defn draw-state [state]
   (q/scale 1 -1)

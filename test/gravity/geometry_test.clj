@@ -6,7 +6,6 @@
             [clojure.test.check.properties :as prop]
             [gravity.geometry :as g]))
 
-
 (defn within [epsilon a b]
   (< (Math/abs (- a b)) epsilon))
 
@@ -28,7 +27,7 @@
   (testing "Co-linear vectors have zero cross product"
     (is (= 0 (g/cross-product [[0 0] [1 0]] [[5 0] [6 0]]))))
   (testing "Parallel vectors have zero cross product"
-    (is (= 0 (g/cross-product [[2 2] [3 3]] [[5 5] [6 6]]))))
+    (is (= 0 (g/cross-product [[2 2] [3 3]] [[2 3] [3 4]]))))
   (testing "[-3,7]x[2,5] = -29"
     (is (= -29 (g/cross-product [[0 0] [-3 7]] [[0 0] [2 5]]))))
   (testing "[-3,7]x[2,5] = -29 after points translated"
@@ -37,7 +36,7 @@
 ; a x b = |a||b|sinA
 (defspec test-cross-product-of-vectors-is-sine-of-angle-between-them-times-lengths 1000
   (prop/for-all [angles (gen/vector (gen/double* {:min 0 :max (* 2 Math/PI) :NaN? false}) 2)
-                [len-1 len-2] (gen/vector (gen/double* {:min 0 :max 1000 :NaN? false}) 2)] 
+                 [len-1 len-2] (gen/vector (gen/double* {:min 0 :max 1000 :NaN? false}) 2)] 
                 (let [[a b] (sort angles)
                       angle (- b a)
                       p1 (g/rotate [len-1 0] a)
@@ -79,7 +78,7 @@
                       p4 (g/rotate [10 0] d)]
                   (is (true? (g/segments-intersect? [p1 p3] [p2 p4])) (str [a b c d] [p1 p3] [p2 p4])))))
 
-(defspec test-non-overlapping-cords--do-not-intersect 1000
+(defspec test-non-overlapping-cords-do-not-intersect 1000
   (prop/for-all [angles (gen/vector-distinct 
                           (gen/double* {:min 1E-5 :max (* 2 Math/PI) :NaN? false })
                          {:num-elements 4})]
