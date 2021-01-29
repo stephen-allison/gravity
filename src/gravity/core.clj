@@ -17,8 +17,8 @@
                                       {:name :bl  :point [-9 -6]}
                                       {:name :br  :point [9 -6]}]})
 
-(def initial-level-state {:terrain [{:type :platform :points [350 50 450 50]}
-                                    {:type :platform :points [50 120 150 120]}]})
+(def initial-level-state {:terrain [{:type :platform :name :platform-1 :points [350 50 450 50]}
+                                    {:type :platform :name :platform-2 :points [50 120 150 120]}]})
 
 (def initial-state {:ship initial-ship-state
                     :level initial-level-state})    
@@ -110,7 +110,7 @@
               (reduce (fn [[vx vy] [fx fy]] [(+ vx (/ fx mass)) (+ vy (/ fy mass))]) 
                       [vx vy] 
                       (vals forces)))))
-
+        
 (defn collision? [item-1 item-2]
   (let [pts1 (collision-points item-1) 
         pts2 (collision-points item-2)
