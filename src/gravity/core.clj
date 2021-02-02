@@ -117,14 +117,18 @@
         collisions (for [p1 pts1 p2 pts2 
                          :when (g/segments-intersect (:points p1) (:points p2))]
                      [(:name p1) (:name  p2)])]
-    (if (not (empty? collisions)) (println collisions) nil)))
+    (seq collisions)))
   
 
 (defn check-collisions [state]
   (let [terrain (get-in state [:level :terrain])
-        colls (map #(collision? (state :ship) %1) terrain)]
-    (assoc state :collisions (into [] colls))
+        colls (filter seq (map #(collision? (state :ship) %1) terrain))]
+    (do
+      (doseq [c colls]
+        (println c))
+      state)
     ))
+
 
 (defn update-state [state]
   (-> state
