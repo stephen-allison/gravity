@@ -47,6 +47,15 @@
   [{:name (platform :name) :points (partition 2 (platform :points))}])
   
 
+(defn stop-ship [state]
+  (assoc-in state [:ship :v] [0 0]))
+
+(defn on-ground [state]
+  (assoc-in state [:ship :forces :reaction] [0 (* -1 gravity-strength)]))
+
+(defn off-ground [state]
+  (update-in state [:ship :forces] dissoc :reaction))
+
 (defn dispatch-collision [s c]
   :land)
 
@@ -55,8 +64,8 @@
 (defmethod collision-handler3 :land [state colls]
   (println :landing)
   (-> state
-      (assoc-in [:ship :v] [0 0])
-      (assoc-in [:ship :forces :gravity] [0 0])))
+      (stop-ship)
+      (on-ground)))
 
 (defmethod collision-handler3 :default [state colls]
   (println :dfaulting)
@@ -95,7 +104,7 @@
         strength thrust-strength]
     (-> state 
         (assoc-in [:ship :forces :thrust] [(* strength x-component) (* strength y-component)])
-        (assoc-in [:ship :forces :gravity] [0 gravity-strength]))))
+        (off-ground))))
 
 (defn update-with-key-input [state] 
   (if (q/key-pressed?)
