@@ -18,7 +18,8 @@
                                       {:name :br  :point [9 -6]}]})
 
 (def initial-level-state {:terrain [{:type :platform :name :platform-1 :points [350 50 450 50]}
-                                    {:type :platform :name :platform-2 :points [50 120 150 120]}]})
+                                    {:type :platform :name :platform-2 :points [50 120 150 120]}
+                                    {:type :platform :name :platform-3 :points [250 130 350 130]}]})
 
 (def initial-state {:ship initial-ship-state
                     :level initial-level-state})    
@@ -45,7 +46,22 @@
 (defmethod collision-points :platform [platform]
   [{:name (platform :name) :points (partition 2 (platform :points))}])
   
-(collision-points {:type :platform, :points [350 50 450 50]})
+
+(defn dispatch-collision [s c]
+  :land)
+
+(defmulti collision-handler3 dispatch-collision)
+
+(defmethod collision-handler3 :land [state colls]
+  (println :landing)
+  (-> state
+      (assoc-in [:ship :v] [0 0])
+      (assoc-in [:ship :forces :gravity] [0 0])))
+
+(defmethod collision-handler3 :default [state colls]
+  (println :dfaulting)
+  state)
+
 
 (defn current-ship-points [ship]
   (let [rotated (map (fn [pt] {:name (:name pt) 
@@ -77,7 +93,9 @@
         x-component (* -1 (Math/sin heading))
         y-component (Math/cos heading)
         strength thrust-strength]
-    (assoc-in state [:ship :forces :thrust] [(* strength x-component) (* strength y-component)])))
+    (-> state 
+        (assoc-in [:ship :forces :thrust] [(* strength x-component) (* strength y-component)])
+        (assoc-in [:ship :forces :gravity] [0 gravity-strength]))))
 
 (defn update-with-key-input [state] 
   (if (q/key-pressed?)
@@ -116,21 +134,15 @@
         pts2 (collision-points item-2)
         collisions (for [p1 pts1 p2 pts2 
                          :when (g/segments-intersect (:points p1) (:points p2))]
-                     [(:name p1) (:name  p2)])]
-    (seq collisions)))
-  
+                     [{:name (:name p1) :item item-1} {:name (:name p2) :item item-2}])]
+    collisions))
 
 (defn check-collisions [state]
   (let [terrain (get-in state [:level :terrain])
-        colls (filter seq (map #(collision? (state :ship) %1) terrain))]
-    (do
-      (doseq [c colls]
-        (println c))
-      state)
-    ))
-
-
-(defn update-state [state]
+        colls (mapcat #(collision? (state :ship) %1) terrain)]
+    (reduce collision-handler3 state colls)))              
+  
+(defn update-state [state ] 
   (-> state
       update-velocity
       update-collision-feelers        
