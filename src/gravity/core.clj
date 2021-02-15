@@ -51,26 +51,34 @@
   (assoc-in state [:ship :v] [0 0]))
 
 (defn on-ground [state]
-  (assoc-in state [:ship :forces :reaction] [0 (* -1 gravity-strength)]))
+  (-> state
+      (assoc-in [:ship :forces :reaction] [0 (* -1 gravity-strength)])
+      (assoc-in [:ship :heading] 0)))
 
 (defn off-ground [state]
   (update-in state [:ship :forces] dissoc :reaction))
 
-(defn dispatch-collision [s c]
-  :land)
+
+(defn dispatch-collision [s [c1 c2]]
+  (if (contains? #{:bl :br} (:name c1))
+    :land
+    :crash))
 
 (defmulti collision-handler3 dispatch-collision)
 
 (defmethod collision-handler3 :land [state colls]
-  (println :landing)
+  (println :land)
   (-> state
       (stop-ship)
       (on-ground)))
 
-(defmethod collision-handler3 :default [state colls]
-  (println :dfaulting)
-  state)
+(defmethod collision-handler3 :crash [_ _]
+  (println :crash)
+  initial-state)
 
+(defmethod collision-handler3 :default [state colls]
+  (println :defaulting)
+  state)
 
 (defn current-ship-points [ship]
   (let [rotated (map (fn [pt] {:name (:name pt) 
@@ -142,7 +150,7 @@
   (let [pts1 (collision-points item-1) 
         pts2 (collision-points item-2)
         collisions (for [p1 pts1 p2 pts2 
-                         :when (g/segments-intersect (:points p1) (:points p2))]
+                         :when (g/segments-intersect? (:points p1) (:points p2))]
                      [{:name (:name p1) :item item-1} {:name (:name p2) :item item-2}])]
     collisions))
 

@@ -11,6 +11,7 @@
   "Translates a point [x y] by [dx dy]"
   [[x y] [dx dy]]
   [(+ x dx) (+ y dy)])
+(rotate [0 4] 2)
 
 (defn cross-product 
   "2D cross product of vectors [u1 v1] -> [u2 v2] and [x1 y1] -> [x2 y2]"
@@ -52,3 +53,4 @@
             (and (= 0 d3) (on-segment? p1 p2 p3)) true
             (and (= 0 d4) (on-segment? p1 p2 p4)) true
             :else false))))
+
