@@ -59,8 +59,10 @@
   (update-in state [:ship :forces] dissoc :reaction))
 
 
-(defn dispatch-collision [s [c1 c2]]
-  (if (contains? #{:bl :br} (:name c1))
+(defn dispatch-collision [state [c1 c2]]
+  (if (and
+       (contains? #{:bl :br} (:name c1))
+       (< -0.3 (get-in state [:ship :heading]) 0.3))
     :land
     :crash))
 
@@ -88,9 +90,9 @@
                    :point (g/translate (:point pt) (ship :pos))}) rotated)))
  
 (defn draw-ship [ship]
-  (let [translated (map :point (current-ship-points ship))]
+  (let [translated (mapcat :point (current-ship-points ship))]
     (q/fill 255 255 255)
-    (apply q/triangle (flatten translated))
+    (apply q/triangle translated)
     (q/stroke 255 0 0)
     (q/stroke-weight 2)
     (doseq [[p1 p2] (map :points (ship :feelers))]
